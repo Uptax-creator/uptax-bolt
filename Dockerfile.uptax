@@ -1,0 +1,36 @@
+# UpTax Thin Fork - Dockerfile
+# Baseado no bolt.diy oficial com overlay de branding
+
+FROM ghcr.io/stackblitz-labs/bolt.diy:latest
+
+# Metadados da UpTax
+LABEL maintainer="dev@uptax.net"
+LABEL description="UpTax Flow - AI-Powered Business Automation Platform"
+LABEL version="1.0.0"
+
+# Aplicar branding UpTax (overlay strategy)
+COPY branding/assets/favicon.ico /app/public/favicon.ico
+COPY branding/assets/logo.svg /app/public/logo.svg
+COPY branding/assets/logo-dark.png /app/public/logo-dark.png
+COPY branding/assets/logo-light.png /app/public/logo-light.png
+COPY branding/assets/social-preview.jpg /app/public/social_preview_index.jpg
+
+# Configurações de ambiente UpTax
+ENV APP_NAME="UpTax Flow"
+ENV APP_DESCRIPTION="AI-Powered Business Automation Platform"
+ENV THEME_COLOR="#16a34a"
+ENV BRAND_PRIMARY="#16a34a"
+ENV BRAND_SECONDARY="#059669"
+
+# MCP Configuration
+ENV MCP_CATALOG_URL="/branding/config/mcp-catalog.json"
+ENV MCP_AUTO_DISCOVERY="true"
+
+# Copiar configurações específicas da UpTax
+COPY branding/config/ /app/branding/config/
+
+# Manter porta padrão
+EXPOSE 5173
+
+# Usar entrypoint original do bolt.diy
+CMD ["npm", "run", "start"]

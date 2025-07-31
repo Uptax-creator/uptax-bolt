@@ -1,0 +1,98 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-31",
+  "catalog": {
+    "tier_1_production": [
+      {
+        "id": "omie_fastmcp",
+        "name": "Omie FastMCP",
+        "description": "Integração completa com Omie ERP - 49 ferramentas financeiras",
+        "version": "2.0.0",
+        "endpoint": "http://localhost:3000",
+        "protocol": "http",
+        "status": "active",
+        "capabilities": ["financial_integration", "invoicing", "crm"],
+        "tools_count": 49,
+        "categories": ["ERP", "Financial", "CRM"],
+        "documentation": "https://docs.uptax.net/mcps/omie",
+        "icon": "/icons/omie.svg",
+        "activation_cmd": "python omie_fastmcp_unified.py",
+        "health_check": "/health",
+        "supported_auth": ["api_key", "oauth2"]
+      },
+      {
+        "id": "nibo_mcp",
+        "name": "Nibo MCP",
+        "description": "Integração contábil e fiscal com Nibo - 37 ferramentas",
+        "version": "1.5.0",
+        "endpoint": "http://localhost:3001", 
+        "protocol": "http",
+        "status": "homologation",
+        "capabilities": ["accounting", "tax_compliance", "reporting"],
+        "tools_count": 37,
+        "categories": ["Accounting", "Tax", "Compliance"],
+        "documentation": "https://docs.uptax.net/mcps/nibo",
+        "icon": "/icons/nibo.svg",
+        "activation_cmd": "python nibo-mcp/nibo_mcp_server_hybrid.py",
+        "health_check": "/health"
+      },
+      {
+        "id": "n8n_mcp", 
+        "name": "N8N Workflow Engine",
+        "description": "Automação visual de workflows e integrações",
+        "version": "1.0.0",
+        "endpoint": "http://localhost:5678",
+        "protocol": "http",
+        "status": "active",
+        "capabilities": ["visual_workflows", "automation", "integration"],
+        "tools_count": "unlimited",
+        "categories": ["Automation", "Workflow", "Integration"],
+        "documentation": "https://docs.uptax.net/mcps/n8n",
+        "icon": "/icons/n8n.svg",
+        "activation_cmd": "docker compose up -d uptax-n8n",
+        "health_check": "/healthz"
+      }
+    ],
+    "tier_2_utilities": [
+      {
+        "id": "context7_mcp",
+        "name": "Context7 Knowledge Base",
+        "description": "Base de conhecimento inteligente com Context7",
+        "version": "1.0.0",
+        "endpoint": "npm exec @upstash/context7-mcp",
+        "protocol": "stdio",
+        "status": "available",
+        "capabilities": ["documentation", "context_retrieval", "learning"],
+        "categories": ["Knowledge", "Documentation", "AI"],
+        "documentation": "https://docs.uptax.net/mcps/context7",
+        "icon": "/icons/context7.svg"
+      },
+      {
+        "id": "atlas_task_mcp",
+        "name": "Atlas Task Orchestrator", 
+        "description": "Orquestração inteligente de tarefas e recursos",
+        "version": "1.0.0",
+        "endpoint": "python",
+        "protocol": "stdio",
+        "status": "basic_script",
+        "capabilities": ["task_management", "resource_optimization", "scheduling"],
+        "categories": ["Task Management", "Orchestration"],
+        "documentation": "https://docs.uptax.net/mcps/atlas",
+        "icon": "/icons/atlas.svg",
+        "activation_cmd": "python atlas-task-system.py"
+      }
+    ]
+  },
+  "discovery_rules": {
+    "auto_scan_ports": [3000, 3001, 3002, 5678],
+    "health_check_interval": 30,
+    "timeout": 5000,
+    "retry_attempts": 3
+  },
+  "ui_settings": {
+    "show_in_sidebar": true,
+    "group_by_tier": true,
+    "show_status_indicators": true,
+    "enable_quick_actions": true
+  }
+}

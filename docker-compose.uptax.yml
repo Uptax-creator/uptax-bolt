@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  uptax-flow:
+    build:
+      context: .
+      dockerfile: Dockerfile.uptax
+    ports:
+      - "5173:5173"
+    environment:
+      - PORT=5173
+      - APP_NAME=UpTax Flow
+      - APP_DESCRIPTION=AI-Powered Business Automation Platform
+      - THEME_COLOR=#16a34a
+      - MCP_AUTO_DISCOVERY=true
+    volumes:
+      # Desenvolvimento: montar branding local
+      - ./branding/assets:/app/public/branding:ro
+      - ./branding/config:/app/branding/config:ro
+    networks:
+      - uptax-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  # MCPs como serviços externos (não dentro do fork)
+  omie-mcp:
+    image: uptax/omie-fastmcp:latest
+    ports:
+      - "3000:3000" 
+    environment:
+      - OMIE_APP_KEY=${OMIE_APP_KEY}
+      - OMIE_APP_SECRET=${OMIE_APP_SECRET}
+    networks:
+      - uptax-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nibo-mcp:
+    image: uptax/nibo-mcp:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - NIBO_CLIENT_ID=${NIBO_CLIENT_ID}
+      - NIBO_CLIENT_SECRET=${NIBO_CLIENT_SECRET}
+    networks:
+      - uptax-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - uptax-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  uptax-network:
+    driver: bridge
+
+volumes:
+  n8n_data:

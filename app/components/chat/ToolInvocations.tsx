@@ -20,12 +20,20 @@ const highlighterOptions = {
   themes: ['light-plus', 'dark-plus'],
 };
 
-const jsonHighlighter: HighlighterGeneric<BundledLanguage, BundledTheme> =
-  import.meta.hot?.data.jsonHighlighter ?? (await createHighlighter(highlighterOptions));
+let jsonHighlighter: HighlighterGeneric<BundledLanguage, BundledTheme> | null = null;
 
-if (import.meta.hot) {
-  import.meta.hot.data.jsonHighlighter = jsonHighlighter;
-}
+// Initialize highlighter asynchronously
+const initHighlighter = async () => {
+  if (!jsonHighlighter) {
+    jsonHighlighter = import.meta.hot?.data.jsonHighlighter ?? (await createHighlighter(highlighterOptions));
+
+    if (import.meta.hot) {
+      import.meta.hot.data.jsonHighlighter = jsonHighlighter;
+    }
+  }
+
+  return jsonHighlighter;
+};
 
 interface JsonCodeBlockProps {
   className?: string;
@@ -34,34 +42,44 @@ interface JsonCodeBlockProps {
 }
 
 function JsonCodeBlock({ className, code, theme }: JsonCodeBlockProps) {
-  let formattedCode = code;
+  const [html, setHtml] = useState<string>('');
 
-  try {
-    if (typeof formattedCode === 'object') {
-      formattedCode = JSON.stringify(formattedCode, null, 2);
-    } else if (typeof formattedCode === 'string') {
-      // Attempt to parse and re-stringify for formatting
-      try {
-        const parsed = JSON.parse(formattedCode);
-        formattedCode = JSON.stringify(parsed, null, 2);
-      } catch {
-        // Leave as is if not JSON
+  useEffect(() => {
+    let formattedCode = code;
+
+    try {
+      if (typeof formattedCode === 'object') {
+        formattedCode = JSON.stringify(formattedCode, null, 2);
+      } else if (typeof formattedCode === 'string') {
+        // Attempt to parse and re-stringify for formatting
+        try {
+          const parsed = JSON.parse(formattedCode);
+          formattedCode = JSON.stringify(parsed, null, 2);
+        } catch {
+          // Leave as is if not JSON
+        }
       }
+    } catch (e) {
+      // If parsing fails, keep original code
+      logger.error('Failed to parse JSON', { error: e });
     }
-  } catch (e) {
-    // If parsing fails, keep original code
-    logger.error('Failed to parse JSON', { error: e });
-  }
+
+    initHighlighter().then((highlighter) => {
+      if (highlighter) {
+        setHtml(
+          highlighter.codeToHtml(formattedCode, {
+            lang: 'json',
+            theme: theme === 'dark' ? 'dark-plus' : 'light-plus',
+          }),
+        );
+      }
+    });
+  }, [code, theme]);
 
   return (
     <div
       className={classNames('text-xs rounded-md overflow-hidden mcp-tool-invocation-code', className)}
-      dangerouslySetInnerHTML={{
-        __html: jsonHighlighter.codeToHtml(formattedCode, {
-          lang: 'json',
-          theme: theme === 'dark' ? 'dark-plus' : 'light-plus',
-        }),
-      }}
+      dangerouslySetInnerHTML={{ __html: html }}
       style={{
         padding: '0',
         margin: '0',

@@ -14,12 +14,20 @@ const highlighterOptions = {
   themes: ['light-plus', 'dark-plus'],
 };
 
-const shellHighlighter: HighlighterGeneric<BundledLanguage, BundledTheme> =
-  import.meta.hot?.data.shellHighlighter ?? (await createHighlighter(highlighterOptions));
+let shellHighlighter: HighlighterGeneric<BundledLanguage, BundledTheme> | null = null;
 
-if (import.meta.hot) {
-  import.meta.hot.data.shellHighlighter = shellHighlighter;
-}
+// Initialize highlighter asynchronously
+const initHighlighter = async () => {
+  if (!shellHighlighter) {
+    shellHighlighter = import.meta.hot?.data.shellHighlighter ?? (await createHighlighter(highlighterOptions));
+
+    if (import.meta.hot) {
+      import.meta.hot.data.shellHighlighter = shellHighlighter;
+    }
+  }
+
+  return shellHighlighter;
+};
 
 interface ArtifactProps {
   messageId: string;
@@ -162,17 +170,22 @@ interface ShellCodeBlockProps {
 }
 
 function ShellCodeBlock({ classsName, code }: ShellCodeBlockProps) {
-  return (
-    <div
-      className={classNames('text-xs', classsName)}
-      dangerouslySetInnerHTML={{
-        __html: shellHighlighter.codeToHtml(code, {
-          lang: 'shell',
-          theme: 'dark-plus',
-        }),
-      }}
-    ></div>
-  );
+  const [html, setHtml] = useState<string>('');
+
+  useEffect(() => {
+    initHighlighter().then((highlighter) => {
+      if (highlighter) {
+        setHtml(
+          highlighter.codeToHtml(code, {
+            lang: 'shell',
+            theme: 'dark-plus',
+          }),
+        );
+      }
+    });
+  }, [code]);
+
+  return <div className={classNames('text-xs', classsName)} dangerouslySetInnerHTML={{ __html: html }}></div>;
 }
 
 interface ActionListProps {

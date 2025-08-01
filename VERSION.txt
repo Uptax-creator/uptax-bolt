@@ -1,0 +1,3 @@
+Version: 2025-08-01-FIXED
+Commit: 0ca0f0d
+Status: Top-level await removed

@@ -7,4 +7,4 @@ send_metrics = false
 
 # Environment variables can be added here
 [vars]
-NODE_VERSION = "18.9.0"
+NODE_VERSION = "20.17.0"

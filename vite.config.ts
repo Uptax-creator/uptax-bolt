@@ -11,10 +11,12 @@ dotenv.config();
 export default defineConfig((config) => {
   return {
     define: {
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.NODE_ENV': JSON.stringify(config.mode),
+      'process': JSON.stringify({ env: {} }), // Mock process object for Cloudflare Workers
+      'global': 'globalThis',
     },
     build: {
-      target: 'esnext',
+      target: 'es2020', // Changed from es2022 to avoid import assertions
     },
     plugins: [
       nodePolyfills({

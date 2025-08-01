@@ -4,9 +4,6 @@ import { defineConfig, type ViteDevServer } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { optimizeCssModules } from 'vite-plugin-optimize-css-modules';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 export default defineConfig((config) => {
   return {
@@ -16,32 +13,18 @@ export default defineConfig((config) => {
       'global': 'globalThis',
     },
     build: {
-      target: 'es2020', // Changed from es2022 to avoid import assertions
+      target: 'es2020',
+    },
+    optimizeDeps: {
+      exclude: ['shiki'],
+    },
+    ssr: {
+      noExternal: ['shiki'],
     },
     plugins: [
       nodePolyfills({
-        include: ['buffer', 'process', 'util', 'stream'],
-        globals: {
-          Buffer: true,
-          process: true,
-          global: true,
-        },
-        protocolImports: true,
-        exclude: ['child_process', 'fs', 'path'],
+        include: ['path', 'buffer', 'process'],
       }),
-      {
-        name: 'buffer-polyfill',
-        transform(code, id) {
-          if (id.includes('env.mjs')) {
-            return {
-              code: `import { Buffer } from 'buffer';\n${code}`,
-              map: null,
-            };
-          }
-
-          return null;
-        },
-      },
       config.mode !== 'test' && remixCloudflareDevProxy(),
       remixVitePlugin({
         future: {
